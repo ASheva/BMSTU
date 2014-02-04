@@ -33,13 +33,55 @@ public class Equalizer implements FilterCoefficient {
 
         signalDataToFile(signalData);
         fft(signalData);
+        filtration(signalData);
 
+    }
+
+    public static void filtration(double[] sourseData) throws Exception{
+        double summ = 0;
+        for (int i = 0; i < N; i++) {
+            if (i <= coef_lowpass.length)
+                for (int j = i; j > 0; j--) {
+                    summ += sourseData[j] * coef_lowpass[i - j];
+                }
+            else if (i > coef_lowpass.length)
+                for (int j = 0; j < coef_lowpass.length; j++) {
+                    summ += sourseData[i - j] * coef_lowpass[j];
+                }
+            filterResult[i] = summ;
+            summ = 0;
+        }
+        for (int k = 0; k < N; k++) {
+            rReal[k] = 0;
+            rImg[k] = 0;
+        }
+        for (int k = 0; k < N / 2; k++) {
+            for (int n = 0; n < (N / 2); n++) {
+                wnkReal = Math.cos(-2 * Math.PI * (double) (2 * n * k) / N);
+                wnkImg = Math.sin(-2 * Math.PI * (double) (2 * n * k) / N);
+                wnkRealOdd = Math.cos(-2 * Math.PI * (double) (n * (2 * k + 1)) / N);
+                wnkImgOdd = Math.sin(-2 * Math.PI * (double) (n * (2 * k + 1)) / N);
+                rReal[2 * k] += filterResult[n] * wnkReal + filterResult[n +  N / 2] * wnkReal;
+                rReal[2 * k + 1] += filterResult[n] * wnkRealOdd - filterResult[n +  N / 2] * wnkRealOdd;
+                rImg[2 * k] += filterResult[n] * wnkImg + filterResult[n +  N / 2] * wnkImg;
+                rImg[2 * k + 1] += filterResult[n] * wnkImgOdd - filterResult[n +  N / 2] * wnkImgOdd;
+            }
+        }
+        //нахождение амплитуд гармоник
+        for (int i = 0; i < N; i++) {
+            filterResult[i] = Math.sqrt(rImg[i] * rImg[i] + rReal[i] * rReal[i]);
+        }
+        PrintWriter pr = new PrintWriter("C:/Users/Shevchik/Desktop/vova/_dz/filtrResult.txt");
+        for (int i = 0; i < filterResult.length; i++) {
+            pr.println((int)filterResult[i]);
+        }
+        pr.close();
     }
 
     public static void signalDataToFile(double[] sourseData) throws Exception{
         PrintWriter pr = new PrintWriter("C:/Users/Shevchik/Desktop/vova/_dz/wavDouble.txt");
         for (int i = 0; i < sourseData.length; i++) {
-            pr.println(sourseData[i]);
+            pr.println((int)sourseData[i]);
         }
         pr.close();
     }
@@ -67,7 +109,7 @@ public class Equalizer implements FilterCoefficient {
         }
         PrintWriter pr = new PrintWriter("C:/Users/Shevchik/Desktop/vova/_dz/fftResult.txt");
         for (int i = 0; i < fftResult.length; i++) {
-            pr.println(fftResult[i]);
+            pr.println((int)fftResult[i]);
         }
         pr.close();
     }

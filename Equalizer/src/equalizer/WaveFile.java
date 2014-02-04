@@ -118,7 +118,7 @@ public class WaveFile {
         int N = dat.length;
         double[] d = new double[N / 2];
         for (int i = 0; i < N / 2; i++) {
-            d[i] = ((short) (((dat[2 * i + 1] & 0xFF) << 8) + (dat[2 * i] & 0xFF))) / ((double) MAX_16_BIT);
+            d[i] = ((short) (((dat[2 * i + 1] & 0xFF) << 8) + (dat[2 * i] & 0xFF)));
         }
         return d;
     }
