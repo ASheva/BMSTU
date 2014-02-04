@@ -1,13 +1,23 @@
 package equalizer;
 
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.geom.Ellipse2D;
+import java.awt.geom.Line2D;
+import java.awt.geom.Rectangle2D;
 import java.io.File;
+import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.HashMap;
 
 /**
  * Created by Shevchik on 03.02.14.
  */
 public class Equalizer implements FilterCoefficient {
     private static int N = 512;
+    private static int[] num = new int[N];
     private static double[] rReal = new double[N];
     private static double[] rImg = new double[N];
     private static double wnkReal;
@@ -16,39 +26,45 @@ public class Equalizer implements FilterCoefficient {
     private static double wnkImgOdd;
     private static double[] signalData;
     private static double[] fftResult = new double[N];
-    private static double[] filterResult = new double[N];
+    private static int[] intResult = new int[N];
+    private static double[] filterLowpassResult = new double[N];
+    private static double[] filterHighpassResult = new double[N];
+    private static double[] filterBandpassResult = new double[N];
+    private static double[] filterBandstopResult = new double[N];
 
     public static void main(String[] args) throws Exception {
-        WaveFile wf = new WaveFile(new File("C:/Users/Shevchik/Desktop/vova/fftFiltr/fft_filter/fft_filter/example.wav"));
-        System.out.println(wf.getAudioFormat());
-        System.out.println("Время длительности: " + wf.getDurationTime() + "s");
-        double[] signalData = wf.read();
-
-        /*
-        //Вывод wav в виде массива значений double
-        for (int i = 0; i < signalData.length; i++){
-            System.out.print(signalData[i]);
+        for (int i = 0; i < N; i++){
+            num[i]=i;
         }
-        */
+        WaveFile wf = new WaveFile(new File("C:/Users/Shevchik/Desktop/cos/fftFiltr/fft_filter/fft_filter/example.wav"));
+        System.out.println(wf.getAudioFormat());
+        System.out.println("Время длительности: " + wf.getDurationTime() + "с");
+        signalData = wf.read();
 
         signalDataToFile(signalData);
         fft(signalData);
-        filtration(signalData);
+        filtration(signalData, filterLowpassResult, coeflowpass, "LowPassResult");
+        filtration(signalData, filterHighpassResult, coefHighpass, "HighPassResult");
+        filtration(signalData, filterBandpassResult, coefBandpass, "BandPassResult");
+        filtration(signalData, filterBandstopResult, coefBandstop, "BandStopResult");
 
+        PaintFrame frame = new PaintFrame();
+        frame.setDefaultCloseOperation(PaintFrame.EXIT_ON_CLOSE);
+        frame.setVisible(true);
     }
 
-    public static void filtration(double[] sourseData) throws Exception{
+    public static void filtration(double[] sourseData, double[] filter, double[] coef, String filterName) throws Exception{
         double summ = 0;
         for (int i = 0; i < N; i++) {
-            if (i <= coef_lowpass.length)
+            if (i <= coef.length)
                 for (int j = i; j > 0; j--) {
-                    summ += sourseData[j] * coef_lowpass[i - j];
+                    summ += sourseData[j] * coef[i - j];
                 }
-            else if (i > coef_lowpass.length)
-                for (int j = 0; j < coef_lowpass.length; j++) {
-                    summ += sourseData[i - j] * coef_lowpass[j];
+            else if (i > coef.length)
+                for (int j = 0; j < coef.length; j++) {
+                    summ += sourseData[i - j] * coef[j];
                 }
-            filterResult[i] = summ;
+            filter[i] = summ;
             summ = 0;
         }
         for (int k = 0; k < N; k++) {
@@ -61,25 +77,25 @@ public class Equalizer implements FilterCoefficient {
                 wnkImg = Math.sin(-2 * Math.PI * (double) (2 * n * k) / N);
                 wnkRealOdd = Math.cos(-2 * Math.PI * (double) (n * (2 * k + 1)) / N);
                 wnkImgOdd = Math.sin(-2 * Math.PI * (double) (n * (2 * k + 1)) / N);
-                rReal[2 * k] += filterResult[n] * wnkReal + filterResult[n +  N / 2] * wnkReal;
-                rReal[2 * k + 1] += filterResult[n] * wnkRealOdd - filterResult[n +  N / 2] * wnkRealOdd;
-                rImg[2 * k] += filterResult[n] * wnkImg + filterResult[n +  N / 2] * wnkImg;
-                rImg[2 * k + 1] += filterResult[n] * wnkImgOdd - filterResult[n +  N / 2] * wnkImgOdd;
+                rReal[2 * k] += filter[n] * wnkReal + filter[n +  N / 2] * wnkReal;
+                rReal[2 * k + 1] += filter[n] * wnkRealOdd - filter[n +  N / 2] * wnkRealOdd;
+                rImg[2 * k] += filter[n] * wnkImg + filter[n +  N / 2] * wnkImg;
+                rImg[2 * k + 1] += filter[n] * wnkImgOdd - filter[n +  N / 2] * wnkImgOdd;
             }
         }
         //нахождение амплитуд гармоник
         for (int i = 0; i < N; i++) {
-            filterResult[i] = Math.sqrt(rImg[i] * rImg[i] + rReal[i] * rReal[i]);
+            filter[i] = Math.sqrt(rImg[i] * rImg[i] + rReal[i] * rReal[i]);
         }
-        PrintWriter pr = new PrintWriter("C:/Users/Shevchik/Desktop/vova/_dz/filtrResult.txt");
-        for (int i = 0; i < filterResult.length; i++) {
-            pr.println((int)filterResult[i]);
+        PrintWriter pr = new PrintWriter("C:/Users/Shevchik/Desktop/cos/_dz/"+filterName+".txt");
+        for (int i = 0; i < filter.length; i++) {
+            pr.println((int) filter[i]);
         }
         pr.close();
     }
 
     public static void signalDataToFile(double[] sourseData) throws Exception{
-        PrintWriter pr = new PrintWriter("C:/Users/Shevchik/Desktop/vova/_dz/wavDouble.txt");
+        PrintWriter pr = new PrintWriter("C:/Users/Shevchik/Desktop/cos/_dz/wavDouble.txt");
         for (int i = 0; i < sourseData.length; i++) {
             pr.println((int)sourseData[i]);
         }
@@ -107,66 +123,83 @@ public class Equalizer implements FilterCoefficient {
         for (int i = 0; i < N; i++) {
             fftResult[i] = Math.sqrt(rImg[i] * rImg[i] + rReal[i] * rReal[i]);
         }
-        PrintWriter pr = new PrintWriter("C:/Users/Shevchik/Desktop/vova/_dz/fftResult.txt");
+        PrintWriter pr = new PrintWriter("C:/Users/Shevchik/Desktop/cos/_dz/fftResult.txt");
         for (int i = 0; i < fftResult.length; i++) {
             pr.println((int)fftResult[i]);
         }
         pr.close();
     }
 
-    //Cooley-Tukey FFT
-    public static Complex[] fft(Complex[] x) {
-        int N = x.length;
+    ///////////////////////////////////////////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////////////////////////////////////////
 
-        if (N == 1) return new Complex[]{x[0]};
+    public static class PaintFrame extends JFrame{
+        private int leftX = 0;
+        private int topY = 0;
+        private int width = 1400;
+        private int height = 700;
 
-        if (N % 2 != 0) {
-            throw new RuntimeException("N не является степенью 2");
+        public PaintFrame() {
+            setBounds(getLeftX(), getTopY(), getWidth(), getHeight());
+            setTitle("Signal plotting");
+            HashMap<String, Effect> effects = new HashMap<String, Effect>();
+            /*
+            effects.put("FFT", new );
+            effects.put("Lowpass", new );
+            effects.put("Highpass", new );
+            effects.put("Bandpass", new );
+            effects.put("Bandstop", new );
+            */
+            PaintPanel panel = new PaintPanel();
+            add(panel);
         }
 
-        Complex[] even = new Complex[N / 2];
-        for (int k = 0; k < N / 2; k++) {
-            even[k] = x[2 * k];
+        public int getLeftX() {
+            return leftX;
         }
-        Complex[] q = fft(even);
 
-        Complex[] odd = even;  // reuse the array
-        for (int k = 0; k < N / 2; k++) {
-            odd[k] = x[2 * k + 1];
+        public int getTopY() {
+            return topY;
         }
-        Complex[] r = fft(odd);
 
-        Complex[] y = new Complex[N];
-        for (int k = 0; k < N / 2; k++) {
-            double kth = -2 * k * Math.PI / N;
-            Complex wk = new Complex(Math.cos(kth), Math.sin(kth));
-            y[k] = q[k].plus(wk.times(r[k]));
-            y[k + N / 2] = q[k].minus(wk.times(r[k]));
+        public int getWidth() {
+            return width;
         }
-        return y;
+
+        public int getHeight() {
+            return height;
+        }
     }
 
-    public double[] getSignalData() {
-        return signalData;
-    }
+    public static class PaintPanel extends JPanel {
+        public PaintPanel(){
+            makeButton("FFT", fftResult);
+            makeButton("Lowpass", filterLowpassResult);
+            makeButton("Highpass", filterHighpassResult);
+            makeButton("Bandpass", filterBandpassResult);
+            makeButton("Bandstop", filterBandstopResult);
+        }
 
-    public void setSignalData(double[] signalData) {
-        this.signalData = signalData;
-    }
+        void makeButton(String name, double[] arr){
+            JButton button = new JButton(name);
+            add(button);
+            button.addActionListener(new ActionListener() {
+                public void actionPerformed(ActionEvent e) {
 
-    public double[] getFftResult() {
-        return fftResult;
-    }
+                }
+            });
+        }
 
-    public void setFftResult(double[] fftResult) {
-        this.fftResult = fftResult;
-    }
+        public void paintComponent(Graphics g){
+            super.paintComponent(g);
+            Graphics2D g2D = (Graphics2D) g;
 
-    public double[] getFilterResult() {
-        return filterResult;
-    }
+            g2D.setPaint(Color.RED);
 
-    public void setFilterResult(double[] filterResult) {
-        this.filterResult = filterResult;
+            for (int i = 0; i < N; i++){
+                intResult[i]=(int)fftResult[i]/3000;
+            }
+            g2D.drawPolyline(num, intResult, N);
+        }
     }
 }

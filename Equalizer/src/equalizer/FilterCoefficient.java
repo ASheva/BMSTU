@@ -3,13 +3,13 @@ package equalizer;
 /**
  * Created by Shevchik on 04.02.14.
  */
-public interface FilterCoefficient {
-    static final int SIZE_LOWPASS = 31;
-    static final int SIZE_HIGHPASS = 31;
-    static final int SIZE_BANDPASS = 31;
-    static final int SIZE_BANDSTOP = 31;
 
-    static double[] coef_lowpass =
+/**
+ * Created by Shevchik on 04.02.14.
+ */
+public interface FilterCoefficient {
+
+    static double[] coeflowpass =
             {
                     0.019771954415860438,
                     -0.0028204532132478752,
@@ -44,7 +44,7 @@ public interface FilterCoefficient {
                     0.019771954415860438
             };
 
-    static double[] coef_highpass =
+    static double[] coefHighpass =
             {
                     -0.023314059456173715,
                     0.069400114521962347,
@@ -79,7 +79,7 @@ public interface FilterCoefficient {
                     -0.023314059456173715
             };
 
-    static double[] coef_bandpass =
+    static double[] coefBandpass =
             {
                     0.020919479281274259,
                     -0.0097922664578778719,
@@ -114,7 +114,7 @@ public interface FilterCoefficient {
                     0.020919479281274259
             };
 
-    static double[] coef_bandstop =
+    static double[] coefBandstop =
             {
                     0.067779352102725274,
                     -0.046719185925452399,
