@@ -2,16 +2,21 @@ package equalizer;
 
 import java.io.File;
 import java.io.PrintWriter;
-import java.util.Arrays;
 
 /**
  * Created by Shevchik on 03.02.14.
  */
 public class Equalizer implements FilterCoefficient {
     private static int N = 512;
-    private double[] signalData;
-    private double[] fftResult;
-    private double[] filterResult;
+    private static double[] rReal = new double[N];
+    private static double[] rImg = new double[N];
+    private static double wnkReal;
+    private static double wnkImg;
+    private static double wnkRealOdd;
+    private static double wnkImgOdd;
+    private static double[] signalData;
+    private static double[] fftResult = new double[N];
+    private static double[] filterResult = new double[N];
 
     public static void main(String[] args) throws Exception {
         WaveFile wf = new WaveFile(new File("C:/Users/Shevchik/Desktop/vova/fftFiltr/fft_filter/fft_filter/example.wav"));
@@ -26,13 +31,45 @@ public class Equalizer implements FilterCoefficient {
         }
         */
 
-        PrintWriter pr = new PrintWriter("C:/Users/Shevchik/Desktop/vova/dz/wavDouble.txt");
-        for (int i = 0; i < signalData.length; i++) {
-            pr.println(signalData[i]);
+        signalDataToFile(signalData);
+        fft(signalData);
+
+    }
+
+    public static void signalDataToFile(double[] sourseData) throws Exception{
+        PrintWriter pr = new PrintWriter("C:/Users/Shevchik/Desktop/vova/_dz/wavDouble.txt");
+        for (int i = 0; i < sourseData.length; i++) {
+            pr.println(sourseData[i]);
         }
         pr.close();
+    }
 
-
+    public static void fft (double[] sourceData) throws Exception{
+        for (int k = 0; k < N; k++) {
+            rReal[k] = 0;
+            rImg[k] = 0;
+        }
+        for (int k = 0; k < N / 2; k++) {
+            for (int n = 0; n < (N / 2); n++) {
+                wnkReal = Math.cos(-2 * Math.PI * (double) (2 * n * k) / N);
+                wnkImg = Math.sin(-2 * Math.PI * (double) (2 * n * k) / N);
+                wnkRealOdd = Math.cos(-2 * Math.PI * (double) (n * (2 * k + 1)) / N);
+                wnkImgOdd = Math.sin(-2 * Math.PI * (double) (n * (2 * k + 1)) / N);
+                rReal[2 * k] += sourceData[n] * wnkReal + sourceData[n +  N / 2] * wnkReal;
+                rReal[2 * k + 1] += sourceData[n] * wnkRealOdd - sourceData[n +  N / 2] * wnkRealOdd;
+                rImg[2 * k] += sourceData[n] * wnkImg + sourceData[n +  N / 2] * wnkImg;
+                rImg[2 * k + 1] += sourceData[n] * wnkImgOdd - sourceData[n +  N / 2] * wnkImgOdd;
+            }
+        }
+        //нахождение амплитуд гармоник
+        for (int i = 0; i < N; i++) {
+            fftResult[i] = Math.sqrt(rImg[i] * rImg[i] + rReal[i] * rReal[i]);
+        }
+        PrintWriter pr = new PrintWriter("C:/Users/Shevchik/Desktop/vova/_dz/fftResult.txt");
+        for (int i = 0; i < fftResult.length; i++) {
+            pr.println(fftResult[i]);
+        }
+        pr.close();
     }
 
     //Cooley-Tukey FFT
