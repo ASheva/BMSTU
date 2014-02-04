@@ -4,16 +4,25 @@ package equalizer;
  * Created by Shevchik on 04.02.14.
  */
 public class Complex {
-    private final double re;   // the real part
-    private final double im;   // the imaginary part
+    private final double re;   // действительная часть
+    private final double im;   // мнимая часть
 
-    // create a new object with the given real and imaginary parts
+    /**
+     * Создает объект с данными действительной и мнимой частями
+     *
+     * @param real - действительная часть
+     * @param imag - мнимая часть
+     */
     public Complex(double real, double imag) {
         re = real;
         im = imag;
     }
 
-    // return a string representation of the invoking Complex object
+    /**
+     * Возвращает строковое представление комплексного объекта
+     *
+     * @return комплексное число строкой
+     */
     public String toString() {
         if (im == 0) return re + "";
         if (re == 0) return im + "i";
@@ -21,8 +30,17 @@ public class Complex {
         return re + " + " + im + "i";
     }
 
-    // return abs/modulus/magnitude and angle/phase/argument
+    /**
+     * Возвращает модуль
+     *
+     * @return модуль
+     */
     public double abs()   { return Math.hypot(re, im); }  // Math.sqrt(re*re + im*im)
+    /**
+     * Возвращает фазу
+     *
+     * @return фаза
+     */
     public double phase() { return Math.atan2(im, re); }  // between -pi and pi
 
     // return a new Complex object whose value is (this + b)

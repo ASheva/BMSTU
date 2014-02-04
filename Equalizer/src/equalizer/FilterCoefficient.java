@@ -3,12 +3,12 @@ package equalizer;
 /**
  * Created by Shevchik on 04.02.14.
  */
-
-/**
- * Created by Shevchik on 04.02.14.
- */
 public interface FilterCoefficient {
 
+
+    /**
+     * Коэффициенты для НЧ фильтра
+     */
     static double[] coeflowpass =
             {
                     0.019771954415860438,
@@ -44,6 +44,9 @@ public interface FilterCoefficient {
                     0.019771954415860438
             };
 
+    /**
+     * Коэффициенты для ВЧ фильтра
+     */
     static double[] coefHighpass =
             {
                     -0.023314059456173715,
@@ -79,6 +82,9 @@ public interface FilterCoefficient {
                     -0.023314059456173715
             };
 
+    /**
+     * Коэффициенты для полосового фильтра
+     */
     static double[] coefBandpass =
             {
                     0.020919479281274259,
@@ -114,6 +120,9 @@ public interface FilterCoefficient {
                     0.020919479281274259
             };
 
+    /**
+     * Коэффициенты для режекторного фильтра
+     */
     static double[] coefBandstop =
             {
                     0.067779352102725274,

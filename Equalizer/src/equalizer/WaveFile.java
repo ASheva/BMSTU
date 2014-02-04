@@ -110,8 +110,7 @@ public class WaveFile {
     }
 
     /**
-     * Возвращает копию массива double представляющих
-     * данные между -1.0 и +1.0.
+     * Возвращает копию массива данных в виде значений типа double
      */
     public double[] read() {
         byte[] dat = Arrays.copyOf(data, data.length);

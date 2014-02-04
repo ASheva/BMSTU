@@ -16,7 +16,7 @@ import java.util.HashMap;
  * Created by Shevchik on 03.02.14.
  */
 public class Equalizer implements FilterCoefficient {
-    private static int N = 512;
+    private static int N = 1024;
     private static int[] num = new int[N];
     private static double[] rReal = new double[N];
     private static double[] rImg = new double[N];
@@ -33,6 +33,8 @@ public class Equalizer implements FilterCoefficient {
     private static double[] filterBandstopResult = new double[N];
 
     public static void main(String[] args) throws Exception {
+        long timerBegin = System.currentTimeMillis();
+
         for (int i = 0; i < N; i++){
             num[i]=i;
         }
@@ -51,6 +53,11 @@ public class Equalizer implements FilterCoefficient {
         PaintFrame frame = new PaintFrame();
         frame.setDefaultCloseOperation(PaintFrame.EXIT_ON_CLOSE);
         frame.setVisible(true);
+
+        long timerEnd = System.currentTimeMillis();
+        long timerDelta = timerEnd - timerBegin;
+        System.out.println();
+        System.out.println("Total workTime: " + timerDelta);
     }
 
     public static void filtration(double[] sourseData, double[] filter, double[] coef, String filterName) throws Exception{
@@ -131,6 +138,7 @@ public class Equalizer implements FilterCoefficient {
     }
 
     ///////////////////////////////////////////////////////////////////////////////////////////////
+    //                  innerClass PaintFrame(JFrame)                                            //
     ///////////////////////////////////////////////////////////////////////////////////////////////
 
     public static class PaintFrame extends JFrame{
